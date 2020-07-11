@@ -18,12 +18,12 @@ return console.warn("Reitit-frontend controller :params is deprecated. Replace w
  * 
  *   Default value is nil, i.e. controller identity doesn't depend on Match.
  */
-reitit.frontend.controllers.get_identity = (function reitit$frontend$controllers$get_identity(p__50227,match){
-var map__50228 = p__50227;
-var map__50228__$1 = (((((!((map__50228 == null))))?(((((map__50228.cljs$lang$protocol_mask$partition0$ & (64))) || ((cljs.core.PROTOCOL_SENTINEL === map__50228.cljs$core$ISeq$))))?true:false):false))?cljs.core.apply.cljs$core$IFn$_invoke$arity$2(cljs.core.hash_map,map__50228):map__50228);
-var identity = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__50228__$1,new cljs.core.Keyword(null,"identity","identity",1647396035));
-var parameters = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__50228__$1,new cljs.core.Keyword(null,"parameters","parameters",-1229919748));
-var params = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__50228__$1,new cljs.core.Keyword(null,"params","params",710516235));
+reitit.frontend.controllers.get_identity = (function reitit$frontend$controllers$get_identity(p__50226,match){
+var map__50227 = p__50226;
+var map__50227__$1 = (((((!((map__50227 == null))))?(((((map__50227.cljs$lang$protocol_mask$partition0$ & (64))) || ((cljs.core.PROTOCOL_SENTINEL === map__50227.cljs$core$ISeq$))))?true:false):false))?cljs.core.apply.cljs$core$IFn$_invoke$arity$2(cljs.core.hash_map,map__50227):map__50227);
+var identity = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__50227__$1,new cljs.core.Keyword(null,"identity","identity",1647396035));
+var parameters = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__50227__$1,new cljs.core.Keyword(null,"parameters","parameters",-1229919748));
+var params = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__50227__$1,new cljs.core.Keyword(null,"params","params",710516235));
 if(cljs.core.not((function (){var and__4174__auto__ = identity;
 if(cljs.core.truth_(and__4174__auto__)){
 return parameters;
@@ -137,18 +137,18 @@ var count__50243_50255 = (0);
 var i__50244_50256 = (0);
 while(true){
 if((i__50244_50256 < count__50243_50255)){
-var controller_50258 = chunk__50242_50254.cljs$core$IIndexed$_nth$arity$2(null,i__50244_50256);
-reitit.frontend.controllers.apply_controller(controller_50258,new cljs.core.Keyword(null,"stop","stop",-2140911342));
+var controller_50257 = chunk__50242_50254.cljs$core$IIndexed$_nth$arity$2(null,i__50244_50256);
+reitit.frontend.controllers.apply_controller(controller_50257,new cljs.core.Keyword(null,"stop","stop",-2140911342));
 
 
-var G__50259 = seq__50241_50253;
-var G__50260 = chunk__50242_50254;
-var G__50261 = count__50243_50255;
-var G__50262 = (i__50244_50256 + (1));
-seq__50241_50253 = G__50259;
-chunk__50242_50254 = G__50260;
-count__50243_50255 = G__50261;
-i__50244_50256 = G__50262;
+var G__50258 = seq__50241_50253;
+var G__50259 = chunk__50242_50254;
+var G__50260 = count__50243_50255;
+var G__50261 = (i__50244_50256 + (1));
+seq__50241_50253 = G__50258;
+chunk__50242_50254 = G__50259;
+count__50243_50255 = G__50260;
+i__50244_50256 = G__50261;
 continue;
 } else {
 var temp__5735__auto___50263 = cljs.core.seq(seq__50241_50253);

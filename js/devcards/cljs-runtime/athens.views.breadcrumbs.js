@@ -46,14 +46,14 @@ return self__4776__auto__.cljs$core$IFn$_invoke$arity$variadic(G__58171,seq58170
 
 athens.views.breadcrumbs.breadcrumb = (function athens$views$breadcrumbs$breadcrumb(var_args){
 var args__4795__auto__ = [];
-var len__4789__auto___58183 = arguments.length;
-var i__4790__auto___58184 = (0);
+var len__4789__auto___58186 = arguments.length;
+var i__4790__auto___58187 = (0);
 while(true){
-if((i__4790__auto___58184 < len__4789__auto___58183)){
-args__4795__auto__.push((arguments[i__4790__auto___58184]));
+if((i__4790__auto___58187 < len__4789__auto___58186)){
+args__4795__auto__.push((arguments[i__4790__auto___58187]));
 
-var G__58185 = (i__4790__auto___58184 + (1));
-i__4790__auto___58184 = G__58185;
+var G__58188 = (i__4790__auto___58187 + (1));
+i__4790__auto___58187 = G__58188;
 continue;
 } else {
 }

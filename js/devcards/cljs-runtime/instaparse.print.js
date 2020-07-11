@@ -275,8 +275,8 @@ var parser = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__55910,(1),null);
 if(cljs.core.not_EQ_.cljs$core$IFn$_invoke$arity$2(non_terminal,start)){
 return cljs.core.cons(instaparse.print.rule__GT_str(non_terminal,parser),instaparse$print$Parser__GT_str_$_iter__55903(cljs.core.rest(s__55904__$2)));
 } else {
-var G__55933 = cljs.core.rest(s__55904__$2);
-s__55904__$1 = G__55933;
+var G__55937 = cljs.core.rest(s__55904__$2);
+s__55904__$1 = G__55937;
 continue;
 }
 }

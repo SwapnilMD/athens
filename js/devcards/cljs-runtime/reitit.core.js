@@ -2004,10 +2004,10 @@ reitit.exception.fail_BANG_.cljs$core$IFn$_invoke$arity$2(new cljs.core.Keyword(
 } else {
 }
 
-var temp__5735__auto___50317 = new cljs.core.Keyword(null,"validate","validate",-201300827).cljs$core$IFn$_invoke$arity$1(opts__$1);
-if(cljs.core.truth_(temp__5735__auto___50317)){
-var validate_50318 = temp__5735__auto___50317;
-(validate_50318.cljs$core$IFn$_invoke$arity$2 ? validate_50318.cljs$core$IFn$_invoke$arity$2(compiled_routes,opts__$1) : validate_50318.call(null,compiled_routes,opts__$1));
+var temp__5735__auto___50315 = new cljs.core.Keyword(null,"validate","validate",-201300827).cljs$core$IFn$_invoke$arity$1(opts__$1);
+if(cljs.core.truth_(temp__5735__auto___50315)){
+var validate_50316 = temp__5735__auto___50315;
+(validate_50316.cljs$core$IFn$_invoke$arity$2 ? validate_50316.cljs$core$IFn$_invoke$arity$2(compiled_routes,opts__$1) : validate_50316.call(null,compiled_routes,opts__$1));
 } else {
 }
 

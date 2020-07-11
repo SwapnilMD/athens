@@ -14,8 +14,8 @@ cljc.java_time.year.at_day = (function cljc$java_time$year$at_day(this4505,int45
 return this4505.atDay(int4506);
 });
 cljc.java_time.year.plus = (function cljc$java_time$year$plus(var_args){
-var G__50676 = arguments.length;
-switch (G__50676) {
+var G__50674 = arguments.length;
+switch (G__50674) {
 case 3:
 return cljc.java_time.year.plus.cljs$core$IFn$_invoke$arity$3((arguments[(0)]),(arguments[(1)]),(arguments[(2)]));
 
@@ -56,8 +56,8 @@ cljc.java_time.year.is_before = (function cljc$java_time$year$is_before(this4517
 return this4517.isBefore(java_time_Year4518);
 });
 cljc.java_time.year.minus = (function cljc$java_time$year$minus(var_args){
-var G__50679 = arguments.length;
-switch (G__50679) {
+var G__50678 = arguments.length;
+switch (G__50678) {
 case 2:
 return cljc.java_time.year.minus.cljs$core$IFn$_invoke$arity$2((arguments[(0)]),(arguments[(1)]));
 
@@ -113,8 +113,8 @@ cljc.java_time.year.minus_years = (function cljc$java_time$year$minus_years(this
 return this4540.minusYears(long4541);
 });
 cljc.java_time.year.parse = (function cljc$java_time$year$parse(var_args){
-var G__50681 = arguments.length;
-switch (G__50681) {
+var G__50680 = arguments.length;
+switch (G__50680) {
 case 1:
 return cljc.java_time.year.parse.cljs$core$IFn$_invoke$arity$1((arguments[(0)]));
 
