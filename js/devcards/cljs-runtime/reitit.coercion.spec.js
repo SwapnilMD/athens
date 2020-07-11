@@ -150,21 +150,21 @@ return this$__$1;
 
 goog.object.set(reitit.coercion.spec.IntoSpec,"_",true);
 
-var G__49971_50019 = reitit.coercion.spec.into_spec;
-var G__49972_50020 = "_";
-var G__49973_50021 = (function (this$,_){
+var G__49970_50014 = reitit.coercion.spec.into_spec;
+var G__49971_50015 = "_";
+var G__49972_50016 = (function (this$,_){
 return spec_tools.core.create_spec(new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"spec","spec",347520401),this$], null));
 });
-goog.object.set(G__49971_50019,G__49972_50020,G__49973_50021);
+goog.object.set(G__49970_50014,G__49971_50015,G__49972_50016);
 
 goog.object.set(reitit.coercion.spec.IntoSpec,"null",true);
 
-var G__49974_50022 = reitit.coercion.spec.into_spec;
-var G__49975_50023 = "null";
-var G__49976_50024 = (function (this$,_){
+var G__49973_50017 = reitit.coercion.spec.into_spec;
+var G__49974_50018 = "null";
+var G__49975_50019 = (function (this$,_){
 return null;
 });
-goog.object.set(G__49974_50022,G__49975_50023,G__49976_50024);
+goog.object.set(G__49973_50017,G__49974_50018,G__49975_50019);
 reitit.coercion.spec.stringify_pred = (function reitit$coercion$spec$stringify_pred(pred){
 return cljs.core.str.cljs$core$IFn$_invoke$arity$1(((cljs.core.seq_QMARK_(pred))?cljs.core.seq(pred):pred));
 });

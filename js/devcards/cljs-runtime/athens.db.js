@@ -146,8 +146,8 @@ return block;
 } else {
 var ch = new cljs.core.Keyword("block","children","block/children",-1040716209).cljs$core$IFn$_invoke$arity$1(block);
 var n = cljs.core.count(ch);
-var G__32898 = cljs.core.get.cljs$core$IFn$_invoke$arity$2(ch,(n - (1)));
-block = G__32898;
+var G__32900 = cljs.core.get.cljs$core$IFn$_invoke$arity$2(ch,(n - (1)));
+block = G__32900;
 continue;
 }
 break;
@@ -210,10 +210,10 @@ return acc;
 if(cljs.core.truth_((pred.cljs$core$IFn$_invoke$arity$1 ? pred.cljs$core$IFn$_invoke$arity$1(x) : pred.call(null,x)))){
 return cljs.core.conj.cljs$core$IFn$_invoke$arity$2(acc,x);
 } else {
-var G__32906 = cljs.core.conj.cljs$core$IFn$_invoke$arity$2(acc,x);
-var G__32907 = cljs.core.next(xs__$1);
-acc = G__32906;
-xs__$1 = G__32907;
+var G__32907 = cljs.core.conj.cljs$core$IFn$_invoke$arity$2(acc,x);
+var G__32908 = cljs.core.next(xs__$1);
+acc = G__32907;
+xs__$1 = G__32908;
 continue;
 
 }
