@@ -3,14 +3,13 @@
     [athens.db :as db]
     [athens.router :refer [navigate-uid]]
     [athens.style :as style :refer [color OPACITIES]]
+    [athens.util :refer [date-string]]
     [cljsjs.react]
     [cljsjs.react.dom]
     [clojure.string :as str]
     [garden.selectors :as selectors]
     [posh.reagent :refer [pull-many q]]
-    [stylefy.core :as stylefy :refer [use-style use-sub-style]]
-    [tick.alpha.api :as t]
-    [tick.locale-en-us]))
+    [stylefy.core :as stylefy :refer [use-style use-sub-style]]))
 
 
 ;;; Styles
@@ -25,7 +24,7 @@
 
 (def table-style
   {:flex "1 1 100%"
-   :margin "0 1rem"
+   :margin "0 2rem"
    :text-align "left"
    :border-collapse "collapse"
    ::stylefy/sub-styles {:th-date {:text-align "right"}
@@ -35,8 +34,8 @@
                                     :min-width "10em"
                                     :word-break "break-word"
                                     :font-weight "500"
-                                    :font-size "21px"
-                                    :line-height "27px"}
+                                    :font-size "1.3125em"
+                                    :line-height "1.28"}
                          :body-preview {:white-space "wrap"
                                         :word-break "break-word"
                                         :overflow "hidden"
@@ -46,40 +45,25 @@
                                         :-webkit-box-orient "vertical"}
                          :td-date {:text-align "right"
                                    :opacity (:opacity-high OPACITIES)
-                                   :font-size "12px"
+                                   :font-size "0.75em"
                                    :min-width "9em"}}
    ::stylefy/manual [[:tbody {:vertical-align "top"}
                       [:tr {:transition "background 0.1s ease"}
-                       [:td {:border-top (str "1px solid " (color :panel-color))
+                       [:td {:border-top (str "1px solid " (color :border-color))
                              :transition "box-shadow 0.1s ease"}
-                        [(selectors/& (selectors/first-child)) {:border-radius "8px 0 0 8px"
-                                                                :box-shadow "-16px 0 transparent"}]
-                        [(selectors/& (selectors/last-child)) {:border-radius "0 8px 8px 0"
-                                                               :box-shadow "16px 0 transparent"}]]
-                       [:&:hover {:background-color (color :panel-color :opacity-low)
-                                  :border-radius "8px"}
-                        [:td [(selectors/& (selectors/first-child)) {:box-shadow [["-16px 0 " (color :panel-color :opacity-low)]]}]]
-                        [:td [(selectors/& (selectors/last-child)) {:box-shadow [["16px 0 " (color :panel-color :opacity-low)]]}]]]]]
-                     [:td :th {:padding "8px"}]
+                        [(selectors/& (selectors/first-child)) {:border-radius "0.5rem 0 0 0.5rem"
+                                                                :box-shadow "-1rem 0 transparent"}]
+                        [(selectors/& (selectors/last-child)) {:border-radius "0 0.5rem 0.5rem 0"
+                                                               :box-shadow "1rem 0 transparent"}]]
+                       [:&:hover {:background-color (color :background-minus-1 :opacity-med)
+                                  :border-radius "0.5rem"}
+                        [:td [(selectors/& (selectors/first-child)) {:box-shadow [["-1rem 0 " (color :background-minus-1 :opacity-med)]]}]]
+                        [:td [(selectors/& (selectors/last-child)) {:box-shadow [["1rem 0 " (color :background-minus-1 :opacity-med)]]}]]]]]
+                     [:td :th {:padding "0.5rem"}]
                      [:th [:h5 {:opacity (:opacity-med OPACITIES)}]]]})
 
 
 ;;; Components
-
-
-(def date-col-format (t/formatter "LLLL dd, yyyy h':'mma"))
-
-
-(defn date-string
-  [ts]
-  (if (not ts)
-    [:span "(unknown date)"]
-    (as->
-      (t/instant ts) x
-      (t/date-time x)
-      (t/format date-col-format x)
-      (str/replace x #"AM" "am")
-      (str/replace x #"PM" "pm"))))
 
 
 (defn table

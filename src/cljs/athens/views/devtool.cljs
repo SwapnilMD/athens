@@ -3,7 +3,7 @@
     ["@material-ui/icons" :as mui-icons]
     [athens.db :as db :refer [dsdb]]
     [athens.style :refer [color]]
-    [athens.views.buttons :refer [button-primary button]]
+    [athens.views.buttons :refer [button]]
     [athens.views.textinput :refer [textinput-style]]
     [cljs.pprint :as pp]
     [cljsjs.react]
@@ -31,20 +31,20 @@
 (def container-style
   {:grid-area     "devtool"
    :flex-direction "column"
-   :background    (color :panel-color)
+   :background    (color :background-minus-1)
    :position      "relative"
    :width         "100vw"
    :height        "33vh"
-   :display "flex"
+   :display       "flex"
    :overflow-y    "auto"
    :right         0
    :z-index       2})
 
 
 (def tabs-style
-  {:padding "0 8px"
+  {:padding "0 0.5rem"
    :flex "0 0 auto"
-   :background (darken (color :panel-color) 5)
+   :background (darken (color :background-minus-1) 5)
    :display "flex"
    :align-items "stretch"
    :justify-content "space-between"
@@ -58,7 +58,7 @@
 
 (def panels-style
   {:overflow-y "auto"
-   :padding "8px"})
+   :padding "0.5rem"})
 
 
 (def current-location-style
@@ -66,7 +66,7 @@
    :align-items "center"
    :flex "1 1 100%"
    :font-size "14px"
-   :border-bottom [["1px solid" (darken (color :panel-color) 10)]]})
+   :border-bottom [["1px solid" (darken (color :background-minus-1) 10)]]})
 
 
 (def current-location-name-style
@@ -85,25 +85,25 @@
    :font-size "12px"
    :font-family "IBM Plex Sans Condensed"
    :letter-spacing "-0.01em"
-   :margin "8px 0 0"
+   :margin "0.5rem 0 0"
    :border-spacing "0"
    :min-width "100%"
-   ::stylefy/manual [[:td {:border-top [["1px solid " (darken (color :panel-color) 5)]]
-                           :padding "2px"}]
+   ::stylefy/manual [[:td {:border-top [["1px solid " (color :border-color)]]
+                           :padding "0.125rem"}]
                      [:tbody {:vertical-align "top"}]
-                     [:th {:text-align "left" :padding "2px 2px" :white-space "nowrap"}]
+                     [:th {:text-align "left" :padding "0.125rem 0.125rem" :white-space "nowrap"}]
                      [:tr {:transition "all 0.05s ease"}]
-                     [:td:first-child :th:first-child {:padding-left "8px"}]
-                     [:td:last-child :th-last-child {:padding-right "8px"}]
+                     [:td:first-child :th:first-child {:padding-left "0.5rem"}]
+                     [:td:last-child :th-last-child {:padding-right "0.5rem"}]
                      [:tbody [:tr:hover {:cursor "pointer"
-                                         :background (darken (color :panel-color) 2.5)
+                                         :background (darken (color :background-minus-1) 2.5)
                                          :color (color :header-text-color)}]]
                      [:td>ul {:padding "0"
                               :margin "0"
                               :list-style "none"}]
-                     [:td [:li {:margin "0 0 4px"
-                                :padding-top "4px";
-                                :border-top (str "1px solid " (color :panel-color))}]]
+                     [:td [:li {:margin "0 0 0.25rem"
+                                :padding-top "0.25rem";
+                                :border-top (str "1px solid " (color :border-color))}]]
                      [:td [:li:first-child {:border-top "none" :margin-top "0" :padding-top "0"}]]
                      [:a {:color (color :link-color)}]
                      [:a:hover {:text-decoration "underline"}]]})
@@ -114,9 +114,9 @@
 
 (def query-input-style
   (merge textinput-style {:width "100%"
-                          :min-height "40px"
+                          :min-height "2.5rem"
                           :font-size "12px"
-                          :background (color :app-bg-color)
+                          :background (color :background-color)
                           :font-family "IBM Plex Mono"}))
 
 
@@ -191,11 +191,11 @@
                          ""
                          (pr-str cell))]))]))]] ; use the edn-viewer here as well?
        (when (< @limit (count rows))
-         [button-primary {:on-click-fn #(swap! limit + 10)
-                          :style {:width "100%"
-                                  :justify-content "center"
-                                  :margin "4px 0"}
-                          :label "Load More"}])])))
+         [button {:on-click #(swap! limit + 10)
+                  :style {:width "100%"
+                          :justify-content "center"
+                          :margin "0.25rem 0"}}
+          "Load More"])])))
 
 
 ; TODO add truncation of long strings here
@@ -328,24 +328,25 @@
              (for [i (-> navs count range)]
                (let [nav (get navs i)]
                  ^{:key i}
-                 [button {:label [:<> [:> mui-icons/ChevronLeft] [:span (first nav)]]
-                          :style {:padding "2px 4px"}
-                          :on-click-fn #(swap! state (fn [s]
-                                                       (-> s
-                                                           (update :navs subvec 0 i)
-                                                           (dissoc :viewer))))}])))
+                 [button {:style {:padding "0.125rem 0.25rem"}
+                          :on-click #(swap! state (fn [s]
+                                                    (-> s
+                                                        (update :navs subvec 0 i)
+                                                        (dissoc :viewer))))}
+                  [:<> [:> mui-icons/ChevronLeft] [:span (first nav)]]])))
            [:h3 (use-style current-location-name-style) (pr-str (type navved-data))]
            [:div (use-style current-location-controls-style)
             [:span "View as "]
             (for [v applicable-vs]
               (let [click-fn #(swap! state assoc :viewer v)]
                 ^{:key v}
-                [button {:on-click-fn click-fn
-                         :active (= v viewer-name)
-                         :label (name v)}]))]]]
+                [button {:on-click click-fn
+                         :active (= v viewer-name)}
+                 (name v)]))]]]
          (when (d/db? navved-data)
-           [button-primary {:on-click-fn #(restore-db! navved-data)
-                            :label "Restore this db"}])
+           [button {:on-click #(restore-db! navved-data)
+                    :primary true}
+            "Restore this db"])
          [viewer datafied-data add-nav!]]))))
 
 
@@ -455,17 +456,18 @@
 
 (defn devtool-prompt-el
   []
-  [button-primary {:on-click-fn #(dispatch [:devtool/toggle])
-                   :label [:<>
-                           [:> mui-icons/Build]
-                           [:span "Toggle devtool"]]
-                   :style {:font-size "11px"}}])
+  [button {:on-click #(dispatch [:devtool/toggle])
+           :primary true
+           :style {:font-size "11px"}}
+   [:<>
+    [:> mui-icons/Build]
+    [:span "Toggle devtool"]]])
 
 
 (defn devtool-close-el
   []
-  [button {:on-click-fn #(dispatch [:devtool/toggle])
-           :label [:> mui-icons/Clear]}])
+  [button {:on-click #(dispatch [:devtool/toggle])}
+   [:> mui-icons/Clear]])
 
 
 (defn devtool-el
@@ -476,12 +478,12 @@
       [:div (use-style container-style)
        [:nav (use-style tabs-style)
         [:div (use-style tabs-section-style)
-         [button {:on-click-fn #(switch-panel :query)
-                  :active (= active-panel :query)
-                  :label [:<> [:> mui-icons/ShortText] [:span "Query"]]}]
-         [button {:on-click-fn #(switch-panel :txes)
-                  :active (= active-panel :txes)
-                  :label [:<> [:> mui-icons/History] [:span "Transactions"]]}]]
+         [button {:on-click #(switch-panel :query)
+                  :active (= active-panel :query)}
+          [:<> [:> mui-icons/ShortText] [:span "Query"]]]
+         [button {:on-click #(switch-panel :txes)
+                  :active (= active-panel :txes)}]
+         [:<> [:> mui-icons/History] [:span "Transactions"]]]
         [devtool-close-el]]
        [:div (use-style panels-style)
         (case active-panel

@@ -1,20 +1,21 @@
 (ns athens.views.node-page
   (:require
     ["@material-ui/icons" :as mui-icons]
-    [athens.db :as db]
-    [athens.patterns :as patterns]
-    [athens.router :refer [navigate-uid]]
+    [athens.db :as db :refer [get-linked-references get-unlinked-references]]
+    [athens.parse-renderer :as parse-renderer :refer [pull-node-from-string]]
+    [athens.router :refer [navigate-uid navigate]]
     [athens.style :refer [color]]
-    [athens.views.blocks :refer [block-el]]
+    [athens.util :refer [now-ts gen-block-uid escape-str]]
+    [athens.views.blocks :refer [block-el bullet-style]]
     [athens.views.breadcrumbs :refer [breadcrumbs-list breadcrumb]]
     [athens.views.buttons :refer [button]]
+    [athens.views.dropdown :refer [dropdown-style menu-style menu-separator-style]]
     [cljsjs.react]
     [cljsjs.react.dom]
     [clojure.string :as string]
     [garden.selectors :as selectors]
     [goog.functions :refer [debounce]]
     [komponentit.autosize :as autosize]
-    [posh.reagent :refer [#_pull q]]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [stylefy.core :as stylefy :refer [use-style]]
@@ -35,7 +36,7 @@
   {:position "relative"
    :overflow "visible"
    :flex-grow "1"
-   :margin "0.2em 0"
+   :margin "0.2em 0 0.2em 1rem"
    :letter-spacing "-0.03em"
    :word-break "break-word"
    ::stylefy/manual [[:textarea {:display "none"}]
@@ -60,7 +61,7 @@
                                  :margin "0"
                                  :font-size "inherit"
                                  :line-height "inherit"
-                                 :border-radius "4px"
+                                 :border-radius "0.25rem"
                                  :transition "opacity 0.15s ease"
                                  :border "0"
                                  :opacity "0"
@@ -99,9 +100,9 @@
 
 
 (def references-group-style
-  {:background (color :panel-color :opacity-low)
+  {:background (color :background-minus-2 :opacity-med)
    :padding "1rem 0.5rem"
-   :border-radius "4px"
+   :border-radius "0.25rem"
    :margin "0.5em 0"})
 
 
@@ -111,11 +112,21 @@
 
 
 (def references-group-block-style
-  {:border-top [["1px solid " (color :panel-color)]]
+  {:border-top [["1px solid " (color :border-color)]]
    :padding-block-start "1em"
    :margin-block-start "1em"
    ::stylefy/manual [[:&:first-of-type {:border-top "0"
                                         :margin-block-start "0"}]]})
+
+
+(def page-menu-toggle-style
+  {:position "absolute"
+   :left "-0.5rem"
+   :border-radius "1000px"
+   :padding "0.375rem 0.5rem"
+   :color (color :body-text-color :opacity-high)
+   :top "50%"
+   :transform "translate(-100%, -50%)"})
 
 
 ;;; Helpers
@@ -129,44 +140,6 @@
 (def db-handler (debounce handler 500))
 
 
-(defn get-ref-ids
-  [pattern]
-  @(q '[:find [?e ...]
-        :in $ ?regex
-        :where
-        [?e :block/string ?s]
-        [(re-find ?regex ?s)]]
-      db/dsdb
-      pattern))
-
-
-(defn merge-parents-and-block
-  [ref-ids]
-  (let [parents (reduce-kv (fn [m _ v] (assoc m v (db/get-parents-recursively v)))
-                           {}
-                           ref-ids)
-        blocks (map (fn [id] (db/get-block-document id)) ref-ids)]
-    (mapv
-      (fn [block]
-        (merge block {:block/parents (get parents (:db/id block))}))
-      blocks)))
-
-
-(defn group-by-parent
-  [blocks]
-  (group-by (fn [x]
-              (-> x
-                  :block/parents
-                  first
-                  :node/title))
-            blocks))
-
-
-(defn get-data
-  [pattern]
-  (-> pattern get-ref-ids merge-parents-and-block group-by-parent seq))
-
-
 (defn is-timeline-page
   [uid]
   (boolean
@@ -176,62 +149,124 @@
       (catch js/Object _ false))))
 
 
+(defn handle-new-first-child-block-click
+  [parent-uid]
+  (let [new-uid   (gen-block-uid)
+        now       (now-ts)]
+    (dispatch [:transact [{:block/uid       parent-uid
+                           :edit/time       now
+                           :block/children  [{:block/order  0
+                                              :block/uid    new-uid
+                                              :block/open   true
+                                              :block/string ""}]}]])
+    (dispatch [:editing/uid new-uid])))
+
+
 ;;; Components
+
+(defn placeholder-block-el
+  [parent-uid]
+  [:div {:class "block-container"}
+   [:div {:style {:display "flex"}}
+    [:span (use-style bullet-style)]
+    [:span {:on-click #(handle-new-first-child-block-click parent-uid)} "Click here to add content..."]]])
 
 
 ;; TODO: where to put page-level link filters?
 (defn node-page-el
-  [{:block/keys [children uid] title :node/title} editing-uid ref-groups timeline-page?]
+  [_ _ _ _]
+  (let [state (r/atom {:menu/show false
+                       :menu/x nil
+                       :menu/y nil})]
+    (fn [block editing-uid ref-groups timeline-page?]
+      (let [{:block/keys [children uid] title :node/title is-shortcut? :page/sidebar} block
+            {:menu/keys [show x y]} @state]
 
-  [:div (use-style page-style)
+        [:div (use-style page-style {:class ["node-page"]})
+         ;; TODO: implement timeline
+         ;;(when timeline-page?
+         ;;  [button {:on-click #(dispatch [:jump-to-timeline uid])}
+         ;;              [:<>
+         ;;               [:mui-icons Left]
+         ;;               [:span "Timeline"]]}])
 
-   ;; TODO: implement timeline
-   ;;(when timeline-page?
-   ;;  [button {:on-click-fn #(dispatch [:jump-to-timeline uid])
-   ;;           :label [:<>
-   ;;                   [:mui-icons Left]
-   ;;                   [:span "Timeline"]]}])
+         ;; Header
+         [:h1 (use-style title-style {:data-uid uid :class "page-header"})
+          (when-not timeline-page?
+            [autosize/textarea
+             {:default-value title
+              :class         (when (= editing-uid uid) "is-editing")
+              :auto-focus    true
+              :on-change     (fn [e] (db-handler (.. e -target -value) uid))}])
+          [button {:class    [(when show "active")]
+                   :on-click (fn [e]
+                               (if show
+                                 (swap! state assoc :menu/show false)
+                                 (let [rect (.. e -target getBoundingClientRect)]
+                                   (swap! state merge {:menu/show true
+                                                       :menu/x    (.. rect -left)
+                                                       :menu/y    (.. rect -bottom)}))))
+                   :style    page-menu-toggle-style}
+           [:> mui-icons/ExpandMore]]
 
-   ;; Header
-   [:h1 (use-style title-style {:data-uid uid :class "page-header"})
-    (when-not timeline-page?
-      [autosize/textarea
-       {:default-value title
-        :class      (when (= editing-uid uid) "is-editing")
-        :auto-focus true
-        :on-change  (fn [e] (db-handler (.. e -target -value) uid))}])
-    [:span title]]
+          (when show
+            [:div (merge (use-style dropdown-style)
+                         {:style {:font-size "14px"
+                                  :position "fixed"
+                                  :left (str x "px")
+                                  :top (str y "px")}})
+             [:div (use-style menu-style)
+              (if is-shortcut?
+                [button {:on-click #(dispatch [:page/remove-shortcut uid])}
+                 [:<>
+                  [:> mui-icons/BookmarkBorder]
+                  [:span "Remove Shortcut"]]]
+                [button {:on-click #(dispatch [:page/add-shortcut uid])}
+                 [:<>
+                  [:> mui-icons/Bookmark]
+                  [:span "Add Shortcut"]]])
+              [:hr (use-style menu-separator-style)]
+              [button {:on-click #(do
+                                    (navigate :pages)
+                                    (dispatch [:page/delete uid]))}
+               [:<> [:> mui-icons/Delete] [:span "Delete Page"]]]]])
+          (parse-renderer/parse-and-render title uid)]
 
-   ;; Children
-   [:div
-    (for [{:block/keys [uid] :as child} children]
-      ^{:key uid}
-      [block-el child])]
+         ;; Children
+         (if (empty? children)
+           [placeholder-block-el uid]
+           [:div
+            (for [{:block/keys [uid] :as child} children]
+              ^{:key uid}
+              [block-el child])])
 
-   ;; References
-   (doall
-     (for [[linked-or-unlinked refs] ref-groups]
-       (when (not-empty refs)
-         [:section (use-style references-style {:key linked-or-unlinked})
-          [:h4 (use-style references-heading-style)
-           [(r/adapt-react-class mui-icons/Link)]
-           [:span linked-or-unlinked]
-           [button {:label    [(r/adapt-react-class mui-icons/FilterList)]
-                    :disabled true}]]
-          [:div (use-style references-list-style)
-           (for [[group-title group] refs]
-             [:div (use-style references-group-style {:key group-title})
-              [:h4 (use-style references-group-title-style)
-               [:a {:on-click #(navigate-uid uid)} group-title]] ;; FIXME: use correct uid
-              (for [{:block/keys [uid parents] :as block} group]
-                [:div (use-style references-group-block-style {:key uid})
-              ;; TODO: expand parent on click
-                 [block-el block]
-                 (when (> (count parents) 1)
-                   [breadcrumbs-list {:style reference-breadcrumbs-style}
-                    [(r/adapt-react-class mui-icons/LocationOn)]
-                    (for [{:keys [node/title block/string block/uid]} parents]
-                      [breadcrumb {:key uid :on-click #(navigate-uid uid)} (or title string)])])])])]])))])
+
+         ;; References
+         (doall
+           (for [[linked-or-unlinked refs] ref-groups]
+             (when (not-empty refs)
+               [:section (use-style references-style {:key linked-or-unlinked})
+                [:h4 (use-style references-heading-style)
+                 [(r/adapt-react-class mui-icons/Link)]
+                 [:span linked-or-unlinked]
+                 [button {:disabled true} [(r/adapt-react-class mui-icons/FilterList)]]]
+                [:div (use-style references-list-style)
+                 (doall
+                   (for [[group-title group] refs]
+                     [:div (use-style references-group-style {:key (str "group-" group-title)})
+                      [:h4 (use-style references-group-title-style)
+                       [:a {:on-click #(navigate-uid (:block/uid @(pull-node-from-string group-title)))} group-title]]
+                      (doall
+                        (for [{:block/keys [uid parents] :as block} group]
+                          [:div (use-style references-group-block-style {:key (str "ref-" uid)})
+                           ;; TODO: expand parent on click
+                           [block-el block]
+                           (when (> (count parents) 1)
+                             [breadcrumbs-list {:style reference-breadcrumbs-style}
+                              [(r/adapt-react-class mui-icons/LocationOn)]
+                              (doall
+                                (for [{:keys [node/title block/string block/uid]} parents]
+                                  [breadcrumb {:key (str "breadcrumb-" uid) :on-click #(navigate-uid uid)} (or title string)]))])]))]))]])))]))))
 
 
 (defn node-page-component
@@ -242,7 +277,7 @@
         editing-uid @(subscribe [:editing/uid])
         timeline-page? (is-timeline-page uid)]
     (when-not (string/blank? title)
-      ;; TODO: turn ref-groups into an atom, let users toggle open/close
-      (let [ref-groups [["Linked References" (-> title patterns/linked get-data)]
-                        ["Unlinked References" (-> title patterns/unlinked get-data)]]]
+      ;; TODO: let users toggle open/close references
+      (let [ref-groups [["Linked References" (get-linked-references (escape-str title))]
+                        ["Unlinked References" (get-unlinked-references (escape-str title))]]]
         [node-page-el node editing-uid ref-groups timeline-page?]))))

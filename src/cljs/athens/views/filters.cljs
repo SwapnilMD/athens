@@ -33,16 +33,16 @@
    :font-size "12px"
    :align-items "center"
    :text-align "right"
-   :border-bottom (str "1px solid " (color :panel-color))
-   :margin "4px 0 0"
-   :padding-bottom "4px"
+   :border-bottom (str "1px solid " (color :background-minus-1))
+   :margin "0.25rem 0 0"
+   :padding-bottom "0.25rem"
    :justify-content "space-between"
    :font-weight "500"
    :color (color :body-text-color :opacity-high)
    ::stylefy/manual [[:svg {:font-size "20px"}]]})
 
 
-(def sort-control-style {:padding "4px 6px"
+(def sort-control-style {:padding "0.25rem 0.375rem"
                          ::stylefy/manual [[:&:hover :&:focus [:& [:+ [:span {:opacity 1}]]]]]})
 
 
@@ -63,7 +63,7 @@
    :display "flex"
    :flex "1 1 100%"
    :overflow-y "auto"
-   :padding "4px 0 0"
+   :padding "0.25rem 0 0"
    :flex-direction "column"})
 
 
@@ -71,13 +71,13 @@
   {:width           "100%"
    :display         "flex"
    :justify-content "space-between"
-   :padding         "2px 8px"
+   :padding         "0.125rem 0.5rem"
    :align-items     "center"
-   :border-radius   "4px"
+   :border-radius   "0.25rem"
    :margin-block-end "1px"
    :user-select     "none"
    :transition      "all 0.1s ease"
-   ::stylefy/manual [[:&:hover {:background (color :panel-color :opacity-med)}]
+   ::stylefy/manual [[:&:hover {:background (color :background-minus-1 :opacity-med)}]
                      [:&:active {:transform "scale(0.99)"}]]})
 
 
@@ -97,7 +97,7 @@
 
 (def count-style
   {:padding "0 1em 0 0"
-   :color (color :body-text-color)
+   :color (color :body-text-currentColor)
    :font-weight "bold"
    :font-size "11px"
    :text-align "right"
@@ -106,7 +106,7 @@
 
 (def filter-name-style
   {:flex "1 1 100%"
-   :color (color :body-text-color)
+   :color (color :body-text-currentColor)
    :text-align "left"})
 
 
@@ -143,8 +143,8 @@
             filtered-items (reduce-kv
                              (fn [m k v]
                                (if (re-find
-                                     (re-pattern (str "(?i)" (:search @s)))
-                                     k)
+                                    (re-pattern (str "(?i)" (:search @s)))
+                                    k)
                                  (assoc m k v)
                                  m))
                              {}
@@ -173,24 +173,24 @@
 
          ;; Controls
          [:div (use-style controls-style)
-          [button {:label       [:> mui-icons/Sort]
-                   :style sort-control-style
-                   :on-click-fn (fn [_]
-                                  (swap! s assoc :sort (if (= sort_ :lex)
-                                                         :count
-                                                         :lex)))}]
+          [button {:style sort-control-style
+                   :on-click (fn [_]
+                               (swap! s assoc :sort (if (= sort_ :lex)
+                                                      :count
+                                                      :lex)))}
+           [:> mui-icons/Sort]]
           [:span (use-style sort-indicator-style) [:<> [:> mui-icons/ArrowDownward] (if (= sort_ :lex) "Title" "Number")]]
           [:span (str num-filters " Active")]
-          [button {:label "Reset"
-                   :style reset-control-style
-                   :on-click-fn (fn [_]
-                                  (swap! s assoc :items
-                                         (reduce-kv
-                                          (fn [m k v]
-                                            (assoc m k (dissoc v :state)))
-                                          {}
-                                          (:items @s))))}]]
-
+          [button {:style reset-control-style
+                   :on-click (fn [_]
+                               (swap! s assoc :items
+                                      (reduce-kv
+                                       (fn [m k v]
+                                         (assoc m k (dissoc v :state)))
+                                       {}
+                                       (:items @s))))}
+           "Reset"]]
+         
 
          ;; List
          [:div (use-style filter-list-style)

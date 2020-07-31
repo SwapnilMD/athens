@@ -1,5 +1,6 @@
 (ns athens.parse-renderer
   (:require
+    [athens.components :as components]
     [athens.db :as db]
     [athens.parser :as parser]
     [athens.router :refer [navigate-uid]]
@@ -29,17 +30,18 @@
                                              :bottom "-1px"
                                              :z-index -1
                                              :opacity "0"
-                                             :border-radius "4px"
+                                             :border-radius "0.25rem"
                                              :transition "all 0.05s ease"
                                              :background (color :link-color 0.1)}]
-                                  [:&:hover:after {:opacity "1"}]]})
+                                  [:&:hover:after {:opacity "1"}]
+                                  [:&:hover {:z-index 1}]]})
 
 
 (def hashtag {::stylefy/mode [[:hover {:text-decoration "underline"}]]
               ::stylefy/manual [[:.formatting {:opacity (:opacity-low OPACITIES)}]]})
 
 
-(def image {:border-radius "2px"})
+(def image {:border-radius "0.125rem"})
 
 
 (def url-link {:cursor "pointer"
@@ -54,6 +56,27 @@
                 ::stylefy/mode [[:hover {:background-color (color :highlight-color :opacity-lower)
                                          :cursor "alias"}]]})
 
+;;; Helper functions for recursive link rendering
+(defn pull-node-from-string
+  "Gets a block's node from the display string name (or partially parsed string tree)"
+  [string]
+  (pull db/dsdb '[*] [:node/title (str "" (apply + (map (fn [el]
+                                                          (if (string? el)
+                                                            el
+                                                            (str "[[" (clojure.string/join (get-in el [3 2])) "]]"))) string)))]))
+
+
+(defn render-page-link
+  "Renders a page link given the title of the page."
+  [title]
+  ;; This method feels a bit hacky: it extracts the DOM tree of its children components and re-wrap the content in double parentheses. Should we do something about it?
+  ;; TODO: touch from inner content should navigate to the inner (children) page, but in this implementation doesn't work
+  (let [node (pull-node-from-string title)]
+    [:span (use-style page-link {:class "page-link"})
+     [:span {:class "formatting"} "[["]
+     [:span {:on-click (fn [e] (.. e stopPropagation) (navigate-uid (:block/uid @node) e))} (concat title)]
+     [:span {:class "formatting"} "]]"]]))
+
 
 ;;; Components
 
@@ -61,46 +84,47 @@
 ;; Instaparse transforming docs: https://github.com/Engelberg/instaparse#transforming-the-tree
 (defn transform
   "Transforms Instaparse output to Hiccup."
-  [tree]
+  [tree uid]
   (insta/transform
-    {:block     (fn [& contents]
-                  (concat [:span {:class "block" :style {:white-space "pre-line"}}] contents))
-     :page-link (fn [title]
-                  (let [node (pull db/dsdb '[*] [:node/title title])]
-                    [:span (use-style page-link {:class "page-link"})
-                     [:span {:class "formatting"} "[["]
-                     [:span {:on-click (fn [e] (navigate-uid (:block/uid @node) e))} title]
-                     [:span {:class "formatting"} "]]"]]))
-     :block-ref (fn [uid]
-                  (let [block (pull db/dsdb '[*] [:block/uid uid])]
-                    [:span (use-style block-ref {:class "block-ref"})
-                     [:span {:class "contents" :on-click #(navigate-uid uid)} (parse-and-render (:block/string @block))]]))
-     :hashtag   (fn [tag-name]
-                  (let [node (pull db/dsdb '[*] [:node/title tag-name])]
-                    [:span (use-style hashtag) {:class    "hashtag"
-                                                :on-click #(navigate-uid (:block/uid @node))}
-                     [:span {:class "formatting"} "#"]
-                     [:span {:class "contents"} tag-name]]))
-     :url-image (fn [{url :url alt :alt}]
-                  [:img (use-style image {:class "url-image"
-                                          :alt   alt
-                                          :src   url})])
-     :url-link  (fn [{url :url} text]
-                  [:a (use-style url-link {:class "url-link"
-                                           :href  url})
-                   text])
-     :bold      (fn [text]
-                  [:strong {:class "contents bold"} text])}
-    tree))
+    {:block         (fn [& contents]
+                      (concat [:span {:class "block" :style {:white-space "pre-line"}}] contents))
+      ;; for more information regarding how custom components are parsed, see `doc/components.md`
+     :component     (fn [& contents]
+                      (components/render-component (first contents) uid))
+     :page-link     (fn [& title] (render-page-link title))
+     :block-ref     (fn [uid]
+                      (let [block (pull db/dsdb '[*] [:block/uid uid])]
+                        [:span (use-style block-ref {:class "block-ref"})
+                         [:span {:class "contents" :on-click #(navigate-uid uid)} (parse-and-render (:block/string @block) uid)]]))
+     :hashtag       (fn [& tag-name]
+                      (let [parsed-name (concat tag-name)
+                            node        (pull db/dsdb '[*] [:node/title parsed-name])]
+                        [:span (use-style hashtag {:class    "hashtag"
+                                                   :on-click #(navigate-uid (:block/uid @node))})
+                         [:span {:class "formatting"} "#"]
+                         [:span {:class "contents"} parsed-name]]))
+     :url-image     (fn [{url :url alt :alt}]
+                      [:img (use-style image {:class "url-image"
+                                              :alt   alt
+                                              :src   url})])
+     :url-link      (fn [{url :url} text]
+                      [:a (use-style url-link {:class "url-link"
+                                               :href  url})
+                       text])
+     :bold          (fn [text]
+                      [:strong {:class "contents bold"} text])
+     :pre-formatted (fn [text]
+                      [:code text])}
+   tree))
 
 
 (defn parse-and-render
   "Converts a string of block syntax to Hiccup, with fallback formatting if it can’t be parsed."
-  [string]
+  [string uid]
   (let [result (parser/parse-to-ast string)]
     (if (insta/failure? result)
       [:span
        {:title (pr-str (insta/get-failure result))
         :style {:color "red"}}
        string]
-      [vec (transform result)])))
+      [vec (transform result uid)])))

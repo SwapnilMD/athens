@@ -18,6 +18,12 @@
     [:block "A " [:page-link "link"] "."]
     "A [[link]]."
 
+    [:block "A " [:page-link "link"] " and another " [:page-link "link"] "."]
+    "A [[link]] and another [[link]]."
+
+    [:block "Some " [:page-link "Nested " [:page-link "Links"]] " and something"]
+    "Some [[Nested [[Links]]]] and something"
+
     [:block "[[text"]
     "[[text"
 
@@ -28,6 +34,18 @@
     "it’s **very** important"))
 
 
+(deftest parser-pre-formatted-tests
+  (are [x y] (= x (parse-to-ast y))
+    [:block "Hello " [:pre-formatted "world"]]
+    "Hello `world`"
+
+    [:block "Hello " [:pre-formatted "Mars"]]
+    "Hello ```Mars```"
+
+    [:block "Hello " [:pre-formatted "world"] " and " [:pre-formatted "Mars"]]
+    "Hello `world` and `Mars`"))
+
+
 (deftest parser-hashtag-tests
   (are [x y] (= x (parse-to-ast y))
     [:block "some " [:hashtag "me"] " time"]
@@ -35,6 +53,9 @@
 
     [:block "that’s " [:hashtag "very cool"] ", yeah"]
     "that’s #[[very cool]], yeah"
+
+    [:block "also here's " [:hashtag "nested " [:page-link "links"]] " in hashtags!"]
+    "also here's #[[nested [[links]]]] in hashtags!"
 
     [:block "Ends after " [:hashtag "words_are_over"] "!"]
     "Ends after #words_are_over!"
@@ -44,6 +65,15 @@
 
     [:block "learn " [:hashtag "اَلْعَرَبِيَّةُ"] " in a year"]
     "learn #اَلْعَرَبِيَّةُ in a year"))
+
+
+(deftest parser-component-tests
+  (are [x y] (= x (parse-to-ast y))
+    [:block [:component "[[TODO]]" [:page-link "TODO"]] " Pick up groceries"]
+    "{{[[TODO]]}} Pick up groceries"
+
+    [:block [:component "AnotherComponent" "AnotherComponent"] " Another Content"]
+    "{{AnotherComponent}} Another Content"))
 
 
 (deftest parser-url-image-tests

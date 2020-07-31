@@ -1,15 +1,15 @@
 (ns athens.views.left-sidebar
   (:require
-    ["@material-ui/icons" :as mui-icons]
     [athens.db :as db]
-    [athens.router :refer [navigate navigate-uid]]
+    [athens.router :refer [navigate-uid]]
     [athens.style :refer [color OPACITIES]]
-    [athens.views.athena :refer [athena-prompt-el]]
-    [athens.views.buttons :refer [button button-primary]]
+    [athens.util :refer [mouse-offset vertical-center]]
+    [athens.views.buttons :refer [button]]
     [cljsjs.react]
     [cljsjs.react.dom]
     [posh.reagent :refer [q]]
-    [re-frame.core :as re-frame :refer [dispatch subscribe]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.core :as r]
     [stylefy.core :as stylefy :refer [use-style use-sub-style]]))
 
 
@@ -17,56 +17,40 @@
 
 
 (def left-sidebar-style
-  {:flex "0 0 288px"
+  {:width 0
    :grid-area "left-sidebar"
-   :width "288px"
    :height "100%"
    :display "flex"
    :flex-direction "column"
-   :padding "32px 32px 16px 32px"
-   :box-shadow (str "1px 0 " (color :panel-color))
-   ::stylefy/manual [[]]
-   ::stylefy/sub-styles {:top-line {:margin-bottom "40px"
+   :overflow-y "auto"
+   :transition "width 0.5s ease"
+   ::stylefy/sub-styles {:top-line {:margin-bottom "2.5rem"
                                     :display "flex"
                                     :flex "0 0 auto"
                                     :justify-content "space-between"}
-                         :footer {:margin-top "auto"
-                                  :flex "0 0 auto"
+                         :footer {:flex "0 0 auto"
+                                  :margin "auto 2rem 0"
                                   :align-self "stretch"
                                   :display "grid"
                                   :grid-auto-flow "column"
                                   :grid-template-columns "1fr auto auto"
-                                  :grid-gap "4px"}
+                                  :grid-gap "0.25rem"}
                          :small-icon {:font-size "16px"}
-                         :large-icon {:font-size "22px"}}})
+                         :large-icon {:font-size "22px"}}
+   ::stylefy/manual [[:&.is-open {:width "18rem"}]
+                     [:&.is-closed {:width "0"}]]})
 
 
-(def left-sidebar-collapsed-style
-  (merge left-sidebar-style {:flex "0 0 44px"
-                             :display "grid"
-                             :padding "32px 4px 16px"
-                             :grid-gap "4px"
-                             :width "44px"
-                             :box-shadow "1px 0 #EFEDEB"
-                             :overflow-x "hidden"
-                             :grid-template-rows "auto auto 1fr"
-                             :align-self "stretch"
-                             ::stylefy/sub-styles {:footer {:padding-top "40px"
-                                                            :align-self "flex-end"
-                                                            :margin-top "auto"
-                                                            :display "grid"
-                                                            :grid-gap "4px"
-                                                            :grid-auto-flow "row"}}}))
-
-
-(def main-navigation-style
-  {:margin "0 0 32px"
-   :display "grid"
-   :grid-auto-flow "row"
-   :grid-gap "4px"
-   :justify-content "flex-start"
-   ::stylefy/manual [[:svg {:font-size "16px"}]
-                     [:button {:justify-self "flex-start"}]]})
+(def left-sidebar-content-style
+  {:width "18rem"
+   :height "100%"
+   :display "flex"
+   :flex-direction "column"
+   :padding "7.5rem 0 1rem"
+   :transition "opacity 0.5s ease"
+   :opacity 0
+   ::stylefy/manual [[:&.is-open {:opacity 1}]
+                     [:&.is-closed {:opacity 0}]]})
 
 
 (def shortcuts-list-style
@@ -74,13 +58,13 @@
    :display "flex"
    :list-style "none"
    :flex-direction "column"
-   :padding "0"
-   :margin "0 0 32px"
+   :padding "0 2rem"
+   :margin "0 0 2rem"
    :overflow-y "auto"
    ::stylefy/sub-styles {:heading {:flex "0 0 auto"
                                    :opacity (:opacity-med OPACITIES)
                                    :line-height "1"
-                                   :margin "0 0 4px"
+                                   :margin "0 0 0.25rem"
                                    :font-size "inherit"}}})
 
 
@@ -89,7 +73,7 @@
    :cursor "pointer"
    :display "flex"
    :flex "0 0 auto"
-   :padding "4px 0"
+   :padding "0.25rem 0"
    :transition "all 0.05s ease"
    ::stylefy/mode [[:hover {:opacity (:opacity-high OPACITIES)}]]})
 
@@ -111,11 +95,50 @@
 ;;; Components
 
 
+(defn shortcut-component
+  [[_ _ _]]
+  (let [drag (r/atom nil)]
+    (fn [[order title uid]]
+      [:li
+       [:a (use-style (merge shortcut-style
+                             (case @drag
+                               :above {:border-top [["1px" "solid" (color :link-color)]]}
+                               :below {:border-bottom [["1px" "solid" (color :link-color)]]}
+                               {}))
+                      {:on-click      (fn [e] (navigate-uid uid e))
+                       :draggable     true
+                       :on-drag-over  (fn [e]
+                                        (.. e preventDefault)
+                                        (let [offset       (mouse-offset e)
+                                              middle-y     (vertical-center (.. e -target))
+                                     ;; find closest li because sometimes event.target is anchor tag
+                                     ;; if nextSibling is null, then target is last li and therefore end of list
+                                              closest-li   (.. e -target (closest "li"))
+                                              next-sibling (.. closest-li -nextElementSibling)
+                                              last-child?  (nil? next-sibling)]
+                                          (cond
+                                            (> middle-y (:y offset)) (reset! drag :above)
+                                            (and (< middle-y (:y offset)) last-child?) (reset! drag :below))))
+                       :on-drag-start (fn [e]
+                                        (set! (.. e -dataTransfer -dropEffect) "move")
+                                        (.. e -dataTransfer (setData "text/plain" order)))
+                       :on-drag-end   (fn [_])
+                       :on-drag-leave (fn [_] (reset! drag nil))
+                       :on-drop       (fn [e]
+                                        (let [source-order (js/parseInt (.. e -dataTransfer (getData "text/plain")))]
+                                          (prn source-order order)
+                                          (cond
+                                            (= source-order order) nil
+                                            (and (= source-order (dec order)) (= @drag :above)) nil
+                                            (= @drag :below) (dispatch [:left-sidebar/drop-below source-order order])
+                                            :else (dispatch [:left-sidebar/drop-above source-order order])))
+                                        (reset! drag nil))})
+        title]])))
+
+
 (defn left-sidebar
   []
   (let [open? (subscribe [:left-sidebar/open])
-        current-route (subscribe [:current-route])
-        route-name (-> @current-route :data :name)
         shortcuts (->> @(q '[:find ?order ?title ?uid
                              :where
                              [?e :page/sidebar ?order]
@@ -123,57 +146,21 @@
                              [?e :block/uid ?uid]] db/dsdb)
                        seq
                        (sort-by first))]
-    (if (not @open?)
-
-      ;; IF COLLAPSED
-      [:div (use-style left-sidebar-collapsed-style)
-       [button {:on-click-fn #(dispatch [:left-sidebar/toggle])
-                :label       [:> mui-icons/ChevronRight]}]
-       [button-primary {:on-click-fn #(dispatch [:athena/toggle])
-                        :label       [:> mui-icons/Search]}]
-       [:footer (use-sub-style left-sidebar-collapsed-style :footer)
-        [button {:disabled true
-                 :label    [:> mui-icons/TextFormat]}]
-        [button {:disabled true
-                 :label    [:> mui-icons/Settings]}]]]
+    ;; (when @open?
 
       ;; IF EXPANDED
-      [:div (use-style left-sidebar-style)
-       [:div (use-sub-style left-sidebar-style :top-line)
-        [athena-prompt-el]
-        [button {:on-click-fn #(dispatch [:left-sidebar/toggle])
-                 :label       [:> mui-icons/ChevronLeft]}]]
-       [:nav (use-style main-navigation-style)
-
-        [button {:on-click-fn #(navigate :home)
-                 :active      (when (= route-name :home) true)
-                 :label       [:<>
-                               [:> mui-icons/Today]
-                               [:span "Daily Notes"]]}]
-        [button {:on-click-fn #(navigate :pages)
-                 :active      (when (= route-name :pages) true)
-                 :label       [:<>
-                               [:> mui-icons/FileCopy]
-                               [:span "All Pages"]]}]
-        [button {:disabled true
-                 :label    [:<>
-                            [:> mui-icons/BubbleChart]
-                            [:span "Graph Overview"]]}]]
+    [:div (use-style left-sidebar-style {:class (if @open? "is-open" "is-closed")})
+     [:div (use-style left-sidebar-content-style {:class (if @open? "is-open" "is-closed")})
 
        ;; SHORTCUTS
-       [:ol (use-style shortcuts-list-style)
-        [:h2 (use-sub-style shortcuts-list-style :heading) "Shortcuts"]
-        (doall
-          (for [[_order title uid] shortcuts]
-            ^{:key uid}
-            [:li>a (use-style shortcut-style {:on-click #(navigate-uid uid)}) title]))]
+      [:ol (use-style shortcuts-list-style)
+       [:h2 (use-sub-style shortcuts-list-style :heading) "Shortcuts"]
+       (doall
+         (for [sh shortcuts]
+           ^{:key (str "left-sidebar-" (second sh))}
+           [shortcut-component sh]))]
 
        ;; LOGO + BOTTOM BUTTONS
-       [:footer (use-sub-style left-sidebar-style :footer)
-        [:a (use-style notional-logotype-style {:href "https://github.com/athensresearch/athens" :target "_blank"}) "Athens"]
-        [button-primary {:label "Load Test Data"
-                         :on-click-fn #(dispatch [:get-db/init])}]]])))
-;;[button {:disabled true
-;;         :label    [:> mui-icons/TextFormat]}]
-;;[button {:disabled true
-;;         :label    [:> mui-icons/Settings]}]]])))
+      [:footer (use-sub-style left-sidebar-style :footer)
+       [:a (use-style notional-logotype-style {:href "https://github.com/athensresearch/athens" :target "_blank"}) "Athens"]
+       [button {:on-click #(dispatch [:get-db/init]) :primary true} "Load Test Data"]]]]))

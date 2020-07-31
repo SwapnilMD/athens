@@ -5,11 +5,12 @@
     [athens.router :refer [navigate-uid]]
     [athens.style :refer [color DEPTH-SHADOWS OPACITIES ZINDICES]]
     [athens.subs]
-    [athens.util :refer [gen-block-uid]]
-    [athens.views.buttons :refer [button-primary]]
+    [athens.util :refer [gen-block-uid is-beyond-rect?]]
+    [athens.views.buttons :refer [button]]
     [cljsjs.react]
     [cljsjs.react.dom]
     [clojure.string :as str]
+    [garden.selectors :as selectors]
     [goog.functions :refer [debounce]]
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as r]
@@ -23,105 +24,121 @@
 
 
 (def container-style
-  {:width         "784px"
-   :border-radius "4px"
+  {:width         "49rem"
+   :border-radius "0.25rem"
    :box-shadow    [[(:64 DEPTH-SHADOWS) ", 0 0 0 1px " (color :body-text-color :opacity-lower)]]
    :display       "flex"
    :flex-direction "column"
-   :background    (color :app-bg-color)
+   :background    (color :background-plus-1)
    :position      "fixed"
    :overflow      "hidden"
    :max-height    "60vh"
    :z-index       (:zindex-modal ZINDICES)
    :top           "50%"
    :left          "50%"
-   :transform     "translate(-50%, -50%)"})
+   :transform     "translate(-50%, -50%)"
+   ;; Styling for the states of the custom search-cancel button, which depend on the input contents
+   ::stylefy/manual [[(selectors/+ :input :button) {:opacity 0}]
+                     ;; Using ':valid' here as a proxy for "has contents", i.e. "button should appear"
+                     [(selectors/+ :input:valid :button) {:opacity 1}]]})
 
 
 (def athena-input-style
   {:width "100%"
    :border 0
-   :font-size      "38px"
+   :font-size      "2.375rem"
    :font-weight    "300"
-   :line-height    "49px"
+   :line-height    "1.3"
    :letter-spacing "-0.03em"
-   :border-radius "4px 4px 0 0"
-   :color          "#433F38"
+   :border-radius  "0.25rem 0.25rem 0 0"
+   :background     (color :background-plus-2)
+   :color          (color :body-text-color)
    :caret-color    (color :link-color)
-   :padding "24px"
-   :cursor "text"
+   :padding        "1.5rem 4rem 1.5rem 1.5rem"
+   :cursor         "text"
    ::stylefy/mode {:focus {:outline "none"}
-                   "::placeholder" {:color (color :body-text-color :opacity-low)}}})
+                   "::placeholder" {:color (color :body-text-color :opacity-low)}
+                   "::-webkit-search-cancel-button" {:display "none"}}}) ;; We replace the button elsewhere
+
+
+
+(def search-cancel-button-style
+  {:background "none"
+   :color "inherit"
+   :position "absolute"
+   :transition "opacity 0.1s ease, background 0.1s ease"
+   :cursor "pointer"
+   :border 0
+   :right "2rem"
+   :place-items "center"
+   :place-content "center"
+   :height "2.5rem"
+   :width "2.5rem"
+   :border-radius "1000px"
+   :display "flex"
+   :transform "translate(0%, -50%)"
+   :top "50%"
+   ::stylefy/manual [[:&:hover :&:focus {:background (color :background-plus-1)}]]})
 
 
 (def results-list-style
-  {:background    (color :app-bg-color)
+  {:background    (color :background-color)
    :overflow-y "auto"
    :max-height "100%"})
 
 
 (def results-heading-style
-  {:padding "4px 18px"
-   :background (color :app-bg-color)
+  {:padding "0.25rem 1.125rem"
+   :background (color :background-plus-2)
    :display "flex"
    :position "sticky"
+   :align-items "center"
    :top "0"
    :justify-content "space-between"
-   :box-shadow [["0 1px 0 0 " (color :body-text-color :opacity-lower)]]
-   :border-top [["1px solid" (color :body-text-color :opacity-lower)]]})
+   :box-shadow [["0 1px 0 0 " (color :border-color)]]
+   :border-top [["1px solid" (color :border-color)]]})
 
 
 (def result-style
-  {:display "grid"
-   :grid-template "\"title icon\" \"preview icon\""
-   :grid-gap "0 12px"
-   :grid-template-columns "1fr auto"
-   :padding "8px 32px"
-   :background (color :body-text-color 0.02)
+  {:display "flex"
+   :padding "0.75rem 2rem"
+   :background (color :background-plus-1)
+   :color (color :body-text-color)
    :transition "all .05s ease"
-   :border-top [["1px solid " (color :body-text-color :opacity-lower)]]
-   ::stylefy/sub-styles {:title {:grid-area "title"
-                                 :font-size "16px"
+   :border-top [["1px solid " (color :border-color)]]
+   ::stylefy/sub-styles {:title {:font-size "1rem"
                                  :margin "0"
                                  :color (color :header-text-color)
                                  :font-weight "500"}
-                         :preview {:grid-area "preview"
-                                   :white-space "wrap"
+                         :preview {:white-space "wrap"
                                    :word-break "break-word"
-                                  ;;  :overflow "hidden"
-                                  ;;  :text-overflow "ellipsis"
-                                  ;;  :display "-webkit-box"
-                                  ;;  :-webkit-line-clamp "2"
-                                  ;;  :-webkit-box-orient "vertical"
                                    :color (color :body-text-color :opacity-med)}
-                         :link-leader {:grid-area "icon"
-                                       :color "transparent"
+                         :link-leader {:color "transparent"
                                        :margin "auto auto"}}
+   ::stylefy/manual [[:b {:font-weight "500"
+                          :opacity (:opacity-high OPACITIES)}]
+                     [:&.selected :&:hover {:background (color :link-color)
+                                            :color "#fff"} ;; Intentionally not a theme value, because we don't have a semantic way to contrast with :link-color 
+                      [:.title :.preview :.link-leader :.result-highlight {:color "inherit"}]]]})
 
-   ::stylefy/mode {:hover {:background (color :link-color)
-                           :color (color :app-bg-color)}}
-   ::stylefy/manual [[:&.selected {:background (color :link-color)
-                                   :color (color :app-bg-color)}
-                      [:.title :.preview :.link-leader :.result-highlight {:color "inherit"}]]
-                     [:&:hover [:.title :.preview :.link-leader :.result-highlight {:color "inherit"}]]]})
+
+(def result-body-style
+  {:flex "1 1 100%"
+   :display "flex"
+   :flex-direction "column"
+   :justify-content "center"
+   :align-items "flex-start"})
 
 
 (def result-highlight-style
-  {:color "#000"
+  {:color (color :body-text-color)
    :font-weight "500"})
 
 
 (def hint-style
   {:color "inherit"
    :opacity (:opacity-med OPACITIES)
-   :font-size "14px"
-   ::stylefy/manual [[:kbd {:text-transform "uppercase"
-                            :font-family "inherit"
-                            :font-size "12px"
-                            :font-weight 600
-                            :border "1px solid rgba(67, 63, 56, 0.25)"
-                            :border-radius "4px"
-                            :padding "0 4px"}]]})
+   :font-size "14px"})
 
 
 ;;; Utilities
@@ -159,9 +176,7 @@
         shift (.. e -shiftKey)
         {:keys [index query results]} @state
         item (get results index)]
-
     (cond
-      ;; FIXME: why does this only work in Devcards?
       (= key KeyCodes.ESC)
       (dispatch [:athena/toggle])
 
@@ -185,13 +200,37 @@
       (do (dispatch [:athena/toggle])
           (navigate-uid (or (:block/uid (:block/parent item)) (:block/uid item))))
 
-      ;; TODO: change scroll as user reaches top or bottom
-      ;; TODO: what happens when user goes to -1? or past end of list?
       (= key KeyCodes.UP)
-      (swap! state update :index dec)
+      (do
+        (.. e preventDefault)
+        (swap! state update :index #(dec (if (zero? %) (count results) %)))
+        (let [cur-index (:index @state)
+
+              ;; Search input box
+              input-el (.. e -target)
+
+              ;; Get the result list container which is the last element child
+              ;; of the whole athena component
+
+              result-el (.. input-el (closest "div.athena") -lastElementChild)
+
+              ;; Get next element in the result list
+              next-el (nth (array-seq (.. result-el -children)) cur-index)]
+
+          ;; Check if next el is beyond the bounds of the result list and scroll if so
+          (when (is-beyond-rect? next-el result-el)
+            (.. next-el (scrollIntoView (not= cur-index (dec (count results))) {:behavior "auto"})))))
 
       (= key KeyCodes.DOWN)
-      (swap! state update :index inc)
+      (do
+        (.. e preventDefault)
+        (swap! state update :index #(if (= % (dec (count results))) 0 (inc %)))
+        (let [cur-index (:index @state)
+              input-el (.. e -target)
+              result-el (.. input-el (closest "div.athena") -lastElementChild)
+              next-el (nth (array-seq (.. result-el -children)) cur-index)]
+          (when (is-beyond-rect? next-el result-el)
+            (.. next-el (scrollIntoView (zero? cur-index) {:behavior "auto"})))))
 
       :else nil)))
 
@@ -201,11 +240,12 @@
 
 (defn athena-prompt-el
   []
-  [button-primary {:on-click-fn #(dispatch [:athena/toggle])
-                   :label [:<>
-                           [:> mui-icons/Search]
-                           [:span "Find or Create a Page"]]
-                   :style {:font-size "11px"}}])
+  [button {:on-click #(dispatch [:athena/toggle])
+           :primary true
+           :style {:font-size "11px"}}
+   [:<>
+    [:> mui-icons/Search]
+    [:span "Find or Create a Page"]]])
 
 
 (defn results-el
@@ -241,12 +281,18 @@
         search-handler (debounce (create-search-handler s) 500)]
     (when open?
       [:div.athena (use-style container-style)
-       [:input (use-style athena-input-style
-                          {:type        "search"
-                           :auto-focus  true
-                           :placeholder "Find or Create Page"
-                           :on-change   (fn [e] (search-handler (.. e -target -value)))
-                           :on-key-down (fn [e] (key-down-handler e s))})]
+       [:header {:style {:position "relative"}}
+        [:input (use-style athena-input-style
+                           {:type        "search"
+                            :id          "athena-input"
+                            :auto-focus  true
+                            :required    true
+                            :placeholder "Find or Create Page"
+                            :on-change   (fn [e] (search-handler (.. e -target -value)))
+                            :on-key-down (fn [e] (key-down-handler e s))})]
+        [:button (use-style search-cancel-button-style
+                            {:on-click #(set! (.-value (.getElementById js/document "athena-input")))})
+         [:> mui-icons/Close]]]
        [results-el s]
        [(fn []
           (let [{:keys [results query index]} @s]
@@ -265,20 +311,26 @@
                                                                 (dispatch [:page/create query uid])
                                                                 (navigate-uid uid)))
                                                   :class (when (= i index) "selected")})
-                    [:h4.title (use-sub-style result-style :title)
-                     [:b "Create Page: "]
-                     query]
+
+                    [:div (use-style result-body-style)
+                     [:h4.title (use-sub-style result-style :title)
+                      [:b "Create Page: "]
+                      query]]
                     [:span.link-leader (use-sub-style result-style :link-leader) [(r/adapt-react-class mui-icons/Create)]]]
+
                    [:div (use-style result-style {:key      i
                                                   :on-click (fn []
                                                               (let [selected-page {:node/title   title
                                                                                    :block/uid    uid
                                                                                    :block/string string
                                                                                    :query        query}]
+                                                                (dispatch [:athena/toggle])
                                                                 (dispatch [:athena/update-recent-items selected-page])
                                                                 (navigate-uid uid)))
                                                   :class    (when (= i index) "selected")})
-                    [:h4.title (use-sub-style result-style :title) (highlight-match query title)]
-                    (when string
-                      [:span.preview (use-sub-style result-style :preview) (highlight-match query string)])
+                    [:div (use-style result-body-style)
+
+                     [:h4.title (use-sub-style result-style :title) (highlight-match query title)]
+                     (when string
+                       [:span.preview (use-sub-style result-style :preview) (highlight-match query string)])]
                     [:span.link-leader (use-sub-style result-style :link-leader) [(r/adapt-react-class mui-icons/ArrowForward)]]])))]))]])))
