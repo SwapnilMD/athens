@@ -153,57 +153,57 @@ return java.time.LocalDateTime.parse(t);
 }),(function (t){
 return java.time.ZoneId.of(t);
 })]);
-var seq__50488_50504 = cljs.core.seq(time_literals.read_write.tags);
-var chunk__50489_50505 = null;
-var count__50490_50506 = (0);
-var i__50491_50507 = (0);
+var seq__33589_33636 = cljs.core.seq(time_literals.read_write.tags);
+var chunk__33590_33637 = null;
+var count__33591_33638 = (0);
+var i__33592_33639 = (0);
 while(true){
-if((i__50491_50507 < count__50490_50506)){
-var vec__50498_50508 = chunk__50489_50505.cljs$core$IIndexed$_nth$arity$2(null,i__50491_50507);
-var tag_50509 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__50498_50508,(0),null);
-var read_fn_50510 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__50498_50508,(1),null);
-cljs.reader.register_tag_parser_BANG_(tag_50509,read_fn_50510);
+if((i__33592_33639 < count__33591_33638)){
+var vec__33603_33643 = chunk__33590_33637.cljs$core$IIndexed$_nth$arity$2(null,i__33592_33639);
+var tag_33644 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__33603_33643,(0),null);
+var read_fn_33645 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__33603_33643,(1),null);
+cljs.reader.register_tag_parser_BANG_(tag_33644,read_fn_33645);
 
 
-var G__50511 = seq__50488_50504;
-var G__50512 = chunk__50489_50505;
-var G__50513 = count__50490_50506;
-var G__50514 = (i__50491_50507 + (1));
-seq__50488_50504 = G__50511;
-chunk__50489_50505 = G__50512;
-count__50490_50506 = G__50513;
-i__50491_50507 = G__50514;
+var G__33646 = seq__33589_33636;
+var G__33647 = chunk__33590_33637;
+var G__33648 = count__33591_33638;
+var G__33649 = (i__33592_33639 + (1));
+seq__33589_33636 = G__33646;
+chunk__33590_33637 = G__33647;
+count__33591_33638 = G__33648;
+i__33592_33639 = G__33649;
 continue;
 } else {
-var temp__5735__auto___50515 = cljs.core.seq(seq__50488_50504);
-if(temp__5735__auto___50515){
-var seq__50488_50516__$1 = temp__5735__auto___50515;
-if(cljs.core.chunked_seq_QMARK_(seq__50488_50516__$1)){
-var c__4609__auto___50517 = cljs.core.chunk_first(seq__50488_50516__$1);
-var G__50518 = cljs.core.chunk_rest(seq__50488_50516__$1);
-var G__50519 = c__4609__auto___50517;
-var G__50520 = cljs.core.count(c__4609__auto___50517);
-var G__50521 = (0);
-seq__50488_50504 = G__50518;
-chunk__50489_50505 = G__50519;
-count__50490_50506 = G__50520;
-i__50491_50507 = G__50521;
+var temp__5735__auto___33650 = cljs.core.seq(seq__33589_33636);
+if(temp__5735__auto___33650){
+var seq__33589_33654__$1 = temp__5735__auto___33650;
+if(cljs.core.chunked_seq_QMARK_(seq__33589_33654__$1)){
+var c__4609__auto___33655 = cljs.core.chunk_first(seq__33589_33654__$1);
+var G__33660 = cljs.core.chunk_rest(seq__33589_33654__$1);
+var G__33661 = c__4609__auto___33655;
+var G__33662 = cljs.core.count(c__4609__auto___33655);
+var G__33663 = (0);
+seq__33589_33636 = G__33660;
+chunk__33590_33637 = G__33661;
+count__33591_33638 = G__33662;
+i__33592_33639 = G__33663;
 continue;
 } else {
-var vec__50501_50522 = cljs.core.first(seq__50488_50516__$1);
-var tag_50523 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__50501_50522,(0),null);
-var read_fn_50524 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__50501_50522,(1),null);
-cljs.reader.register_tag_parser_BANG_(tag_50523,read_fn_50524);
+var vec__33607_33667 = cljs.core.first(seq__33589_33654__$1);
+var tag_33668 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__33607_33667,(0),null);
+var read_fn_33669 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__33607_33667,(1),null);
+cljs.reader.register_tag_parser_BANG_(tag_33668,read_fn_33669);
 
 
-var G__50525 = cljs.core.next(seq__50488_50516__$1);
-var G__50526 = null;
-var G__50527 = (0);
-var G__50528 = (0);
-seq__50488_50504 = G__50525;
-chunk__50489_50505 = G__50526;
-count__50490_50506 = G__50527;
-i__50491_50507 = G__50528;
+var G__33673 = cljs.core.next(seq__33589_33654__$1);
+var G__33674 = null;
+var G__33675 = (0);
+var G__33676 = (0);
+seq__33589_33636 = G__33673;
+chunk__33590_33637 = G__33674;
+count__33591_33638 = G__33675;
+i__33592_33639 = G__33676;
 continue;
 }
 } else {
