@@ -163,8 +163,8 @@ return clojure.zip.node(loc);
 } else {
 var p = clojure.zip.up(loc);
 if(cljs.core.truth_(p)){
-var G__42867 = p;
-loc = G__42867;
+var G__42873 = p;
+loc = G__42873;
 continue;
 } else {
 return clojure.zip.node(loc);
@@ -177,19 +177,19 @@ break;
  * Returns the loc of the right sibling of the node at this loc, or nil
  */
 clojure.zip.right = (function clojure$zip$right(loc){
-var vec__42822 = loc;
-var node = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__42822,(0),null);
-var map__42825 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__42822,(1),null);
-var map__42825__$1 = (((((!((map__42825 == null))))?(((((map__42825.cljs$lang$protocol_mask$partition0$ & (64))) || ((cljs.core.PROTOCOL_SENTINEL === map__42825.cljs$core$ISeq$))))?true:false):false))?cljs.core.apply.cljs$core$IFn$_invoke$arity$2(cljs.core.hash_map,map__42825):map__42825);
-var path = map__42825__$1;
-var l = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__42825__$1,new cljs.core.Keyword(null,"l","l",1395893423));
-var vec__42826 = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__42825__$1,new cljs.core.Keyword(null,"r","r",-471384190));
-var seq__42827 = cljs.core.seq(vec__42826);
-var first__42828 = cljs.core.first(seq__42827);
-var seq__42827__$1 = cljs.core.next(seq__42827);
-var r = first__42828;
-var rnext = seq__42827__$1;
-var rs = vec__42826;
+var vec__42823 = loc;
+var node = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__42823,(0),null);
+var map__42826 = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__42823,(1),null);
+var map__42826__$1 = (((((!((map__42826 == null))))?(((((map__42826.cljs$lang$protocol_mask$partition0$ & (64))) || ((cljs.core.PROTOCOL_SENTINEL === map__42826.cljs$core$ISeq$))))?true:false):false))?cljs.core.apply.cljs$core$IFn$_invoke$arity$2(cljs.core.hash_map,map__42826):map__42826);
+var path = map__42826__$1;
+var l = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__42826__$1,new cljs.core.Keyword(null,"l","l",1395893423));
+var vec__42827 = cljs.core.get.cljs$core$IFn$_invoke$arity$2(map__42826__$1,new cljs.core.Keyword(null,"r","r",-471384190));
+var seq__42828 = cljs.core.seq(vec__42827);
+var first__42829 = cljs.core.first(seq__42828);
+var seq__42828__$1 = cljs.core.next(seq__42828);
+var r = first__42829;
+var rnext = seq__42828__$1;
+var rs = vec__42827;
 if(cljs.core.truth_((function (){var and__4174__auto__ = path;
 if(cljs.core.truth_(and__4174__auto__)){
 return rs;
@@ -319,14 +319,14 @@ return cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.
  */
 clojure.zip.edit = (function clojure$zip$edit(var_args){
 var args__4795__auto__ = [];
-var len__4789__auto___42878 = arguments.length;
-var i__4790__auto___42879 = (0);
+var len__4789__auto___42892 = arguments.length;
+var i__4790__auto___42894 = (0);
 while(true){
-if((i__4790__auto___42879 < len__4789__auto___42878)){
-args__4795__auto__.push((arguments[i__4790__auto___42879]));
+if((i__4790__auto___42894 < len__4789__auto___42892)){
+args__4795__auto__.push((arguments[i__4790__auto___42894]));
 
-var G__42880 = (i__4790__auto___42879 + (1));
-i__4790__auto___42879 = G__42880;
+var G__42896 = (i__4790__auto___42894 + (1));
+i__4790__auto___42894 = G__42896;
 continue;
 } else {
 }
@@ -397,8 +397,8 @@ var or__4185__auto____$2 = clojure.zip.right(clojure.zip.up(p));
 if(cljs.core.truth_(or__4185__auto____$2)){
 return or__4185__auto____$2;
 } else {
-var G__42888 = clojure.zip.up(p);
-p = G__42888;
+var G__42905 = clojure.zip.up(p);
+p = G__42905;
 continue;
 }
 } else {
@@ -429,8 +429,8 @@ return and__4174__auto__;
 })();
 if(cljs.core.truth_(temp__5733__auto____$1)){
 var child = temp__5733__auto____$1;
-var G__42891 = clojure.zip.rightmost(child);
-loc__$1 = G__42891;
+var G__42906 = clojure.zip.rightmost(child);
+loc__$1 = G__42906;
 continue;
 } else {
 return loc__$1;
@@ -476,8 +476,8 @@ return and__4174__auto__;
 })();
 if(cljs.core.truth_(temp__5733__auto__)){
 var child = temp__5733__auto__;
-var G__42901 = clojure.zip.rightmost(child);
-loc__$1 = G__42901;
+var G__42910 = clojure.zip.rightmost(child);
+loc__$1 = G__42910;
 continue;
 } else {
 return loc__$1;

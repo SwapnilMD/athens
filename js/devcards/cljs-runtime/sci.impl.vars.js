@@ -211,10 +211,10 @@ var vec__58501 = cljs.core.first(kvs);
 var var_STAR_ = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__58501,(0),null);
 var tbox = cljs.core.nth.cljs$core$IFn$_invoke$arity$3(vec__58501,(1),null);
 var tbox_val = tbox.sci$impl$types$IBox$getVal$arity$1(null);
-var G__58528 = cljs.core.assoc.cljs$core$IFn$_invoke$arity$3(ret,var_STAR_,tbox_val);
-var G__58529 = cljs.core.next(kvs);
-ret = G__58528;
-kvs = G__58529;
+var G__58527 = cljs.core.assoc.cljs$core$IFn$_invoke$arity$3(ret,var_STAR_,tbox_val);
+var G__58528 = cljs.core.next(kvs);
+ret = G__58527;
+kvs = G__58528;
 continue;
 } else {
 return ret;
@@ -285,9 +285,9 @@ return cljs.core.apply.cljs$core$IFn$_invoke$arity$5(f,x,y,z,args);
 var G__58532 = function (x,y,z,var_args){
 var args = null;
 if (arguments.length > 3) {
-var G__58535__i = 0, G__58535__a = new Array(arguments.length -  3);
-while (G__58535__i < G__58535__a.length) {G__58535__a[G__58535__i] = arguments[G__58535__i + 3]; ++G__58535__i;}
-  args = new cljs.core.IndexedSeq(G__58535__a,0,null);
+var G__58533__i = 0, G__58533__a = new Array(arguments.length -  3);
+while (G__58533__i < G__58533__a.length) {G__58533__a[G__58533__i] = arguments[G__58533__i + 3]; ++G__58533__i;}
+  args = new cljs.core.IndexedSeq(G__58533__a,0,null);
 } 
 return G__58532__delegate.call(this,x,y,z,args);};
 G__58532.cljs$lang$maxFixedArity = 3;
@@ -1212,14 +1212,14 @@ return (new sci.impl.vars.SciVar(init_val,name,meta__$1));
 
 sci.impl.vars.binding = (function sci$impl$vars$binding(var_args){
 var args__4795__auto__ = [];
-var len__4789__auto___58570 = arguments.length;
-var i__4790__auto___58571 = (0);
+var len__4789__auto___58565 = arguments.length;
+var i__4790__auto___58566 = (0);
 while(true){
-if((i__4790__auto___58571 < len__4789__auto___58570)){
-args__4795__auto__.push((arguments[i__4790__auto___58571]));
+if((i__4790__auto___58566 < len__4789__auto___58565)){
+args__4795__auto__.push((arguments[i__4790__auto___58566]));
 
-var G__58572 = (i__4790__auto___58571 + (1));
-i__4790__auto___58571 = G__58572;
+var G__58567 = (i__4790__auto___58566 + (1));
+i__4790__auto___58566 = G__58567;
 continue;
 } else {
 }
@@ -1236,10 +1236,10 @@ var ret = cljs.core.PersistentVector.EMPTY;
 var vvs = cljs.core.seq(var_vals);
 while(true){
 if(vvs){
-var G__58575 = cljs.core.conj.cljs$core$IFn$_invoke$arity$2(cljs.core.conj.cljs$core$IFn$_invoke$arity$2(ret,cljs.core.sequence.cljs$core$IFn$_invoke$arity$1(cljs.core.seq(cljs.core.concat.cljs$core$IFn$_invoke$arity$2((new cljs.core.List(null,new cljs.core.Symbol(null,"var","var",870848730,null),null,(1),null)),(new cljs.core.List(null,cljs.core.first(vvs),null,(1),null)))))),cljs.core.second(vvs));
-var G__58576 = cljs.core.next(cljs.core.next(vvs));
-ret = G__58575;
-vvs = G__58576;
+var G__58568 = cljs.core.conj.cljs$core$IFn$_invoke$arity$2(cljs.core.conj.cljs$core$IFn$_invoke$arity$2(ret,cljs.core.sequence.cljs$core$IFn$_invoke$arity$1(cljs.core.seq(cljs.core.concat.cljs$core$IFn$_invoke$arity$2((new cljs.core.List(null,new cljs.core.Symbol(null,"var","var",870848730,null),null,(1),null)),(new cljs.core.List(null,cljs.core.first(vvs),null,(1),null)))))),cljs.core.second(vvs));
+var G__58569 = cljs.core.next(cljs.core.next(vvs));
+ret = G__58568;
+vvs = G__58569;
 continue;
 } else {
 return cljs.core.seq(ret);
@@ -1272,14 +1272,14 @@ return sci.impl.vars.getName(cljs.core.deref(sci.impl.vars.current_ns));
 });
 sci.impl.vars.alter_var_root = (function sci$impl$vars$alter_var_root(var_args){
 var args__4795__auto__ = [];
-var len__4789__auto___58578 = arguments.length;
-var i__4790__auto___58579 = (0);
+var len__4789__auto___58575 = arguments.length;
+var i__4790__auto___58576 = (0);
 while(true){
-if((i__4790__auto___58579 < len__4789__auto___58578)){
-args__4795__auto__.push((arguments[i__4790__auto___58579]));
+if((i__4790__auto___58576 < len__4789__auto___58575)){
+args__4795__auto__.push((arguments[i__4790__auto___58576]));
 
-var G__58580 = (i__4790__auto___58579 + (1));
-i__4790__auto___58579 = G__58580;
+var G__58577 = (i__4790__auto___58576 + (1));
+i__4790__auto___58576 = G__58577;
 continue;
 } else {
 }
